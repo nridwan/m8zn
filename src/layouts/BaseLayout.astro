@@ -1,0 +1,46 @@
+---
+import { ViewTransitions } from "astro:transitions";
+import BaseHead from "src/components/BaseHead.astro";
+import Drawer from "src/components/Drawer.astro";
+import Footer from "src/components/Footer.svelte";
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+const prefixTitle = "Mietzen's Atelier";
+const fullTitle = prefixTitle + (title ? " | " + title : "");
+---
+
+<html
+  lang="en"
+  class="bg-base-300 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-base-content"
+>
+  <head>
+    <BaseHead />
+    <title>{fullTitle}</title>
+    <ViewTransitions />
+    <script is:inline>
+      const storedTheme = localStorage.getItem("theme");
+      if (storedTheme) {
+        document.documentElement.setAttribute("data-theme", storedTheme);
+      } else {
+        const userPreferredTheme = window.matchMedia(
+          "(prefers-color-scheme: dracula)"
+        ).matches
+          ? "dracula"
+          : "winter";
+        document.documentElement.setAttribute("data-theme", userPreferredTheme);
+      }
+    </script>
+  </head>
+  <body>
+    <Drawer title={prefixTitle}>
+      <div class="min-h-[50vh]">
+        <slot />
+      </div>
+      <Footer />
+    </Drawer>
+  </body>
+</html>

@@ -1,0 +1,28 @@
+---
+import DrawerNav from "./DrawerNav.astro";
+import DrawerSide from "./DrawerSide.astro";
+
+interface Props {
+  title: string;
+}
+
+let { title }: { title: string } = Astro.props;
+---
+
+<div class="drawer lg:drawer-open">
+  <input id="drawer" type="checkbox" class="drawer-toggle" />
+
+  <DrawerNav {title} />
+  <div class="drawer-content max-lg:pt-16">
+    <div class="p-4">
+      <slot />
+    </div>
+  </div>
+  <div class="drawer-side scrollbar-thin">
+    <label for="drawer" aria-label="close sidebar" class="drawer-overlay"
+    ></label>
+    <div class="w-80 p-4 min-h-full bg-base-100 lg:bg-base-300">
+      <DrawerSide {title} />
+    </div>
+  </div>
+</div>
