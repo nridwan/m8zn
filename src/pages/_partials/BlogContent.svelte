@@ -2,4 +2,6 @@
   import BaseCard from "src/components/BaseCard.svelte";
 </script>
 
-<BaseCard>Blog</BaseCard>
+<BaseCard>
+  <div class="p-4">Blog</div>
+</BaseCard>
