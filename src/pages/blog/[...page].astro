@@ -1,0 +1,78 @@
+---
+import type { GetStaticPathsOptions } from "astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+import BaseCard from "src/components/BaseCard.astro";
+import dayjs from "dayjs";
+import type { BlogContent } from "src/types/blog";
+
+export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+  const posts: BlogContent[] = await getCollection("blog");
+  posts.sort(
+    (a, b) => dayjs(b.data.pubDate).unix() - dayjs(a.data.pubDate).unix()
+  );
+  return paginate(posts, { pageSize: 5 });
+}
+
+const { page } = Astro.props;
+const data = page.data as BlogContent[];
+let title = "Blog";
+if (page.lastPage > 1) {
+  title += " - Page " + page.currentPage;
+}
+---
+
+<BaseLayout title={title}>
+  <div class="envelope-background">
+    {
+      data.map((post) => (
+        <a href={"/blog/" + post.slug}>
+          <BaseCard>
+            <div class="p-4">{post.data.title}</div>
+          </BaseCard>
+        </a>
+      ))
+    }
+  </div>
+  <br />
+  <div class="flex justify-between">
+    {
+      page.url.prev ? (
+        <a href={page.url.prev} class="btn bg-base-100 shadow-xl">
+          {" "}
+          <svg
+            class="h-6 w-6 fill-current md:h-8 md:w-8"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+          >
+            <path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" />
+          </svg>{" "}
+          Recent posts
+        </a>
+      ) : (
+        <div />
+      )
+    }
+    {
+      page.url.next ? (
+        <a href={page.url.next} class="btn bg-base-100 shadow-xl">
+          Older Posts{" "}
+          <svg
+            class="h-6 w-6 fill-current md:h-8 md:w-8"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+          >
+            {" "}
+            <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
+          </svg>
+        </a>
+      ) : (
+        <div />
+      )
+    }
+  </div>
+</BaseLayout>

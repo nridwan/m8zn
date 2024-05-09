@@ -1,4 +1,5 @@
 ---
+import SearchButton from "./SearchButton.svelte";
 import ThemeIcon from "./ThemeIcon.svelte";
 
 interface Props {
@@ -65,6 +66,9 @@ let { title } = Astro.props;
     </a>
     <div class="pl-8 max-lg:hidden">
       <ThemeIcon client:load client:only="svelte" />
+    </div>
+    <div class="pl-8 max-lg:hidden">
+      <SearchButton client:load />
     </div>
   </div>
 </div>

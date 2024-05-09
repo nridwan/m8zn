@@ -1,4 +1,6 @@
 ---
+import SearchButton from "./SearchButton.svelte";
+import SearchModal from "./SearchModal.astro";
 import ThemeIcon from "./ThemeIcon.svelte";
 
 interface Props {
@@ -38,6 +40,10 @@ let { title } = Astro.props;
       >
       <div class="font-bold text-xl">{title}</div>
     </div>
-    <div class="flex"><ThemeIcon client:load client:only="svelte" /></div>
+    <div class="flex gap-2">
+      <ThemeIcon client:load client:only="svelte" />
+      <SearchButton client:load />
+      <SearchModal />
+    </div>
   </nav>
 </div>

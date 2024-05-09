@@ -1,0 +1,25 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection, type CollectionEntry } from "astro:content";
+import BaseCard from "src/components/BaseCard.astro";
+import type { BlogContentData } from "src/types/blog";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: post,
+  }));
+}
+type Props = CollectionEntry<"blog">;
+
+const post = Astro.props;
+const data = post.data as BlogContentData;
+const { Content } = await post.render();
+---
+
+<BaseLayout title={data.title ?? ""} enablePagefind>
+  <BaseCard>
+    <div class="p-4">{data.title}</div>
+  </BaseCard>
+</BaseLayout>

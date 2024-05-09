@@ -6,9 +6,10 @@ import Footer from "src/components/Footer.svelte";
 
 interface Props {
   title: string;
+  enablePagefind?: boolean;
 }
 
-const { title } = Astro.props;
+const { title, enablePagefind = false } = Astro.props;
 const prefixTitle = "Mietzen's Atelier";
 const fullTitle = prefixTitle + (title ? " | " + title : "");
 ---
@@ -37,7 +38,10 @@ const fullTitle = prefixTitle + (title ? " | " + title : "");
   </head>
   <body>
     <Drawer title={prefixTitle}>
-      <div class="min-h-[50vh]">
+      <div
+        class={"min-h-[50vh]" + (enablePagefind ? "" : " disable-pagefind")}
+        data-pagefind-body
+      >
         <slot />
       </div>
       <Footer />

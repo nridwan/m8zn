@@ -1,8 +1,10 @@
 ---
 import BaseLayout from "src/layouts/BaseLayout.astro";
-import IndexContent from "src/pages/_partials/IndexContent.svelte";
+import BaseCard from "src/components/BaseCard.astro";
 ---
 
 <BaseLayout title="Home">
-  <IndexContent />
+  <BaseCard>
+    <div class="p-4">Home</div>
+  </BaseCard>
 </BaseLayout>

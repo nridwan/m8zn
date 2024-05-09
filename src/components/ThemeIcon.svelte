@@ -51,10 +51,10 @@
   });
 </script>
 
-<button onclick={() => handleToggleClick()} class="relative">
+<button onclick={handleToggleClick} class="relative">
   <!-- sun icon -->
   <svg
-    class="fill-current w-10 h-10 transition-all duration-300 {isChecked
+    class="fill-current w-8 h-8 transition-all duration-300 {isChecked
       ? 'opacity-0 rotate-45'
       : 'opacity-100'}"
     xmlns="http://www.w3.org/2000/svg"
@@ -66,7 +66,7 @@
   </svg>
   <!-- moon icon -->
   <svg
-    class="fill-current w-10 h-10 absolute left-0 top-0 transition-all duration-300 {isChecked
+    class="fill-current w-8 h-8 absolute left-0 top-0 transition-all duration-300 {isChecked
       ? 'opacity-100'
       : 'opacity-0 rotate-45'}"
     xmlns="http://www.w3.org/2000/svg"
