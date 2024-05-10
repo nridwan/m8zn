@@ -9,15 +9,18 @@ import BlogListCard from "src/components/BlogListCard.svelte";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const posts: BlogContent[] = await getCollection("blog");
-  const allTags = posts.flatMap((post) => {
-    return post.data.tags || [];
-  });
+  const allTags = new Set<string>();
+  for (let post of posts) {
+    for (let tag of post.data.tags ?? []) {
+      allTags.add(tag.toLowerCase());
+    }
+  }
 
-  console.log(allTags);
+  const listAllTags = [...allTags];
 
-  return allTags.flatMap((tag) => {
+  return listAllTags.flatMap((tag) => {
     const filteredPosts = posts.filter((post) => {
-      return post.data.tags?.includes(tag);
+      return post.data.tags?.find((postTag) => postTag.toLowerCase() == tag);
     });
     filteredPosts.sort(
       (a, b) => dayjs(b.data.pubDate).unix() - dayjs(a.data.pubDate).unix()
