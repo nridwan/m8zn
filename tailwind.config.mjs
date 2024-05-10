@@ -10,7 +10,8 @@ export default {
 	},
 	plugins: [
 		require('daisyui'),
-		require('tailwind-scrollbar')
+		require('tailwind-scrollbar'),
+		require('@tailwindcss/typography'),
 	],
 	daisyui: {
 		themes: ["dracula", "winter"],

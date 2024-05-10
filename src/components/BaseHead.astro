@@ -1,8 +1,12 @@
 ---
-
+import CodeHighlighterScripts from "src/scripts/CodeHighlighterScripts.astro";
+import HeadScripts from "src/scripts/HeadScripts.astro";
 ---
 
 <meta charset="utf-8" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <meta name="viewport" content="width=device-width" />
 <meta name="generator" content={Astro.generator} />
+<link href="/prism/theme.css" rel="stylesheet" />
+<HeadScripts />
+<CodeHighlighterScripts />
