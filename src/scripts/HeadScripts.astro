@@ -8,6 +8,15 @@
     ).matches
       ? "dracula"
       : "winter";
+    localStorage.setItem("theme", userPreferredTheme);
+    window.dispatchEvent(
+      new StorageEvent("storage", {
+        storageArea: localStorage,
+        key: "theme",
+        oldValue: "",
+        newValue: theme,
+      })
+    );
     document.documentElement.setAttribute("data-theme", userPreferredTheme);
   }
 </script>
