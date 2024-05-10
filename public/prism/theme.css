@@ -134,7 +134,7 @@ pre[class*="language-"] {
 }
 
 @supports (selector(:has(*))) {
-  pre:has(.code-lang) {
+  .code-decoration:has(.code-lang) + pre {
     padding-top: 30px;
   }
 }

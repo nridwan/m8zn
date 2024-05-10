@@ -1,6 +1,6 @@
 <script>
-  function renderCodeLang(preBlock: HTMLElement) {
-    const classLang = preBlock.className;
+  function renderCodeLang(container: HTMLElement) {
+    const classLang = container.className;
     const lang = classLang.split("-")[1];
 
     if (lang !== "plaintext") {
@@ -9,7 +9,7 @@
       langSection.className = "code-lang";
       langSection.innerHTML = lang;
 
-      preBlock.prepend(langSection);
+      container.prepend(langSection);
     }
   }
 
@@ -34,7 +34,7 @@
     }
   }
 
-  function renderCopyBtn(preBlock: HTMLElement) {
+  function renderCopyBtn(container: HTMLElement, preBlock: HTMLElement) {
     const copyButton = document.createElement("button");
 
     copyButton.className = "copy-code";
@@ -42,7 +42,7 @@
     copyButton.setAttribute("title", "Copy code to clipboard");
     copyButton.innerHTML = copyImg;
 
-    preBlock.appendChild(copyButton);
+    container.appendChild(copyButton);
 
     copyButton.addEventListener("click", async () => {
       await copyCode(preBlock, copyButton);
@@ -53,10 +53,13 @@
     const preBlocks = Array.from(document.querySelectorAll("pre"));
 
     for (const preBlock of preBlocks) {
-      preBlock.style.position = "relative";
+      const container = document.createElement("div");
+      container.className = "code-decoration";
+      container.style.position = "relative";
+      preBlock.parentElement?.insertBefore(container, preBlock);
 
-      renderCodeLang(preBlock);
-      renderCopyBtn(preBlock);
+      renderCodeLang(container);
+      renderCopyBtn(container, preBlock);
     }
   });
 </script>

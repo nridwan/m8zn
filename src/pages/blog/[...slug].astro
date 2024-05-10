@@ -2,6 +2,7 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getCollection, type CollectionEntry } from "astro:content";
 import BaseCard from "src/components/BaseCard.svelte";
+import BlogDetailCard from "src/components/BlogDetailCard.svelte";
 import type { BlogContentData } from "src/types/blog";
 
 export async function getStaticPaths() {
@@ -18,11 +19,16 @@ const data = post.data as BlogContentData;
 const { Content } = await post.render();
 ---
 
-<BaseLayout title={data.title ?? ""} enablePagefind>
-  <BaseCard>
-    <h1 class="text-4xl font-bold">{data.title}</h1>
-    <article class="prose max-w-full">
-      <Content />
-    </article>
-  </BaseCard>
+<BaseLayout
+  title={data.title ?? ""}
+  description={data.description}
+  type="article"
+  image={data.image}
+  tags={data.tags}
+  enablePagefind
+>
+  {/* @ts-ignore */}
+  <BlogDetailCard {data}>
+    <Content />
+  </BlogDetailCard>
 </BaseLayout>

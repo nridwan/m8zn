@@ -1,6 +1,15 @@
 ---
+import { map } from "astro/zod";
 import CodeHighlighterScripts from "src/scripts/CodeHighlighterScripts.astro";
 import HeadScripts from "src/scripts/HeadScripts.astro";
+interface Props {
+  title: string;
+  type?: string;
+  description?: string;
+  image?: string;
+  tags?: string[];
+}
+const { title, type, description, image, tags } = Astro.props;
 ---
 
 <meta charset="utf-8" />
@@ -8,5 +17,27 @@ import HeadScripts from "src/scripts/HeadScripts.astro";
 <meta name="viewport" content="width=device-width" />
 <meta name="generator" content={Astro.generator} />
 <link href="/prism/theme.css" rel="stylesheet" />
+<meta property="og:title" content={title} />
+<meta property="og:type" content={type ?? "website"} />
+{description && <meta property="og:description" content={description} />}
+{
+  image && (
+    <meta
+      property="og:image"
+      content={
+        /^https?:\/\//.test(image)
+          ? image
+          : Astro.site!.toString().replaceAll(/\/$/g, "") + image
+      }
+    />
+  )
+}
+{
+  type &&
+    tags &&
+    tags.length &&
+    tags.map((tag) => <meta property={type + ":tag"} content={tag} />)
+}
+<meta property="og:url" content={Astro.url} />
 <HeadScripts />
 <CodeHighlighterScripts />

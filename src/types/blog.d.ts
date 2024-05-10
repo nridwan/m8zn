@@ -9,5 +9,4 @@ export interface BlogContentData {
   pubDate?: string;
   image?: string;
   tags?: string[];
-  badge?: string;
 }

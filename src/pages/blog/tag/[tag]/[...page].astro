@@ -6,13 +6,14 @@ import dayjs from "dayjs";
 import type { BlogContent } from "src/types/blog";
 import PaginationButton from "src/components/PaginationButton.svelte";
 import BlogListCard from "src/components/BlogListCard.svelte";
+import { slugify } from "src/utils/slugify";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const posts: BlogContent[] = await getCollection("blog");
   const allTags = new Set<string>();
   for (let post of posts) {
     for (let tag of post.data.tags ?? []) {
-      allTags.add(tag.toLowerCase());
+      allTags.add(slugify(tag));
     }
   }
 
@@ -20,7 +21,7 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
 
   return listAllTags.flatMap((tag) => {
     const filteredPosts = posts.filter((post) => {
-      return post.data.tags?.find((postTag) => postTag.toLowerCase() == tag);
+      return post.data.tags?.find((postTag) => slugify(postTag) == tag);
     });
     filteredPosts.sort(
       (a, b) => dayjs(b.data.pubDate).unix() - dayjs(a.data.pubDate).unix()

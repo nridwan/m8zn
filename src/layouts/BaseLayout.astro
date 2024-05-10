@@ -7,9 +7,20 @@ import Footer from "src/components/Footer.svelte";
 interface Props {
   title: string;
   enablePagefind?: boolean;
+  type?: string;
+  description?: string;
+  image?: string;
+  tags?: string[];
 }
 
-const { title, enablePagefind = false } = Astro.props;
+const {
+  title,
+  enablePagefind = false,
+  type,
+  description,
+  image,
+  tags,
+} = Astro.props;
 const prefixTitle = "Mietzen's Atelier";
 const fullTitle = prefixTitle + (title ? " | " + title : "");
 ---
@@ -20,7 +31,7 @@ const fullTitle = prefixTitle + (title ? " | " + title : "");
 >
   <head>
     <title>{fullTitle}</title>
-    <BaseHead />
+    <BaseHead {title} {type} {description} {image} {tags} />
     <ViewTransitions />
   </head>
 
