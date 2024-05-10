@@ -18,7 +18,7 @@
   <div class="text-center block font-medium text-lg">
     {dayjs(data.pubDate).format("MMM DD, YYYY")}
   </div>
-  <div class="flex mt-2 items-start justify-center gap-2">
+  <div class="flex flex-wrap mt-2 items-start justify-center gap-2">
     <div class="mr-2">Tags:{tags.length ? "" : " -"}</div>
     {#each tags as tag}
       <a
