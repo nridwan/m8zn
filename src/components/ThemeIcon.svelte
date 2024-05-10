@@ -40,9 +40,15 @@
 
   onMount(() => {
     const storedTheme = localStorage.getItem("theme");
-    if (storedTheme) {
-      syncThemeToggle(storedTheme);
+    if (!storedTheme) {
+      const userPreferredTheme = window.matchMedia(
+        "(prefers-color-scheme: dracula)"
+      ).matches
+      ? "dracula"
+      : "winter";
+      setTheme(userPreferredTheme, "");
     }
+    syncThemeToggle(storedTheme);
     window.addEventListener("storage", onStorageChange);
   });
 
