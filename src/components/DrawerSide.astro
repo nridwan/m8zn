@@ -13,14 +13,26 @@ let { title } = Astro.props;
   <h2 class="font-bold text-xl text-center">{title}</h2>
   <div class="mt-4 flex justify-center items-center">
     <img
-      src="https://placehold.co/400x800/000000/FFF.png"
+      src="/avatar.webp"
       alt="avatar"
       class="rounded-full w-32 h-32 object-cover"
     />
   </div>
   <ul class="menu w-full text-base-content font-semibold text-lg">
-    <li><a class="block text-center" href="/">Home</a></li>
-    <li><a class="block text-center" href="/blog">Blog</a></li>
+    <li>
+      <a
+        class={"block text-center" +
+          (Astro.url.pathname == "/" ? " active" : "")}
+        href="/">Home</a
+      >
+    </li>
+    <li>
+      <a
+        class={"block text-center" +
+          (Astro.url.toString().includes("/blog") ? " active" : "")}
+        href="/blog">Blog</a
+      >
+    </li>
   </ul>
   <div class="flex justify-center items-center gap-2 mt-4">
     <a

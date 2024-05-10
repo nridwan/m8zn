@@ -1,0 +1,181 @@
+---
+title: 'Combining Astro, Svelte 5, and Bun'
+description: 'Here is a sample of some basic Markdown syntax that can be used when writing Markdown content in Astro.'
+pubDate: '2024-05-11'
+image: '/assets/240511/cover.jpg'
+tags:
+  - Astro
+  - Svelte
+  - Svelte 5
+  - Bun
+  - DaisyUI
+  - Tailwind
+---
+
+Hello, as the first content, I'll share my experience on developing this site.
+
+### Tech Stack Choices
+
+- Need to create a small blog, that could be run on cloudflare pages, without maintaining any database. ✅ Astro, Svelte, React
+- Want to try Svelte 5 RC ✅ Astro with Svelte Plugin, Svelte 5
+- Need fast performance and can be indexed, also want to try SEO metadata > MPA ✅ Astro
+- Need search feature ✅ Astro with (Pagefind.js)[https://pagefind.app/]
+- Need syntax highlighter ✅ Astro built-in mdx parser with Prisma
+- Easy styling, framework-agnostic css framework ✅ Tailwind + DaisyUI
+- Trying bun on windows ✅ Bun
+
+### Initial Research
+
+- At first, I'm a bit skeptical about how astro can interact with those other stacks,
+then found out that [Astro is compatible with Svelte 5](https://docs.astro.build/en/guides/integrations-guide/svelte/).
+- Figure out about how to style the page in astro, and come across Astro templates.
+There I found [Starlight Theme](https://starlight.astro.build/getting-started/) which already uses tailwind,
+but seems too overkill for this experiment. But, there I find a piece of information about (Pagefind.js)[https://pagefind.app/]
+- Searching through template list, I found [Frosti Template](https://frosti.saroprock.com/blog). 
+Learning the repo structure, it's interesting that it is simple, and already use tailwind+DaisyUI.
+
+### Development Phase
+
+Here I try to combine the puzzle pieces from the information I've gathered in [Initial Research](#initial-research), with steps:
+- Create new astro project from scratch
+- Adding svelte, tailwind, mdx support for astro
+- Changing svelte version to svelte 5 ⚠️ with notes, will explain later
+- Develop layout & components both in Astro and Svelte, try to get the base idea from Frosti Template, 
+and readjusting positioning & styling
+- Add script to change theme ⚠️ with notes, will explain later
+- Add Pagefind.js ⚠️ with notes, will explain later
+- Add pagination & slug page with dummy contents
+- Add tag pagination page
+- Designing Blog List Item & Detail Page
+- Add prismjs styling & copy button
+- Finishing images & contents
+
+### Technical Difficulties and how to solve it
+
+#### Svelte 5 Experimental Support Issue
+
+When using astro with svelte 5, there is an issue where svelte 5 slot, that's now using children props,
+is not working properly when called in astro files, for example:
+
+```astro
+<SomeSvelteComponent>
+  test text
+</SomeSvelteComponent>
+```
+
+In example above, the `test text` won't be shown, because the slot is not functioning properly.
+
+Then I found [this issue](https://github.com/withastro/astro/issues/10512). 
+The issue starter also found the root cause and suggest fixes.
+
+The fixes is tested by updating code in node_modules manually, and it works.
+
+Since I need to get it done quickly, and nervous whether I could make a pull request or not, 
+I decide to make a [working copy for this plugin](https://github.com/nridwan/astrojs-svelte5-patch)
+
+#### Changing Theme
+
+At first, I need to create a button which can read current theme, 
+updating root data-theme and save to local storage when changing the theme.
+
+It doesn't work, the initial script doesn't run, and even onclick event is not fired.
+The reason is Astro by default only render the html content and leave out the script.
+
+It's fixable by adding `client:load` from Astro file to other framework component 
+that is called and needs to be able to run js. For example:
+```astro
+<ThemeIcon client:load />
+```
+
+Next, I want it to be conscious of changes (2 button and multiple tab must sync the state), 
+that I need to use `storage` event that's fired every time localStorage value updated. 
+there are 2 fatal flaw when implementing this.
+
+First, rule of thumb, when listening at something when component initialized (onMount/initState/other similar function) 
+on a declarative UI approach, do not forget to unlisten it once the component is removed (onDestroy/dispose/other similar function). 
+But, this time, the compiler got error when using onDestroy function. the reason is, onDestroy called server side.
+
+To make the component's script doesn't get loaded on server side, need to add client:only directive.
+example:
+```astro
+<ThemeIcon client:load client:only="svelte" />
+```
+
+Second, the listener doesn't get executed when localStorage changed. It's because storage event will only fire on another tab.
+To make it fire on own tab, create custom storage event right after localStorage updated.
+```astro
+window.dispatchEvent(
+  new StorageEvent("storage", {
+    storageArea: localStorage,
+    key: "theme",
+    oldValue: oldTheme,
+    newValue: theme,
+  })
+);
+```
+
+Last, the loading process from localStorage to be applied when page load, is taking several frame before it's applied.
+After researching, it's because of the script will only run when page is fully loaded. To be honest, 
+this was annoying for my eyes, since it's too flashy. Searching in starlight repo, since their theme changing script
+is flawless, I found that you can use script in astro files and mark it as `is:inline` 
+to make it load as soon as script is parsed while pausing render process. so, to load the theme once after reload,
+here's the script:
+```astro
+<script is:inline>
+  const storedTheme = localStorage.getItem("theme");
+  if (storedTheme) {
+    document.documentElement.setAttribute("data-theme", storedTheme);
+  } else {
+    const userPreferredTheme = window.matchMedia(
+      "(prefers-color-scheme: dracula)"
+    ).matches
+      ? "dracula"
+      : "winter";
+    document.documentElement.setAttribute("data-theme", userPreferredTheme);
+  }
+</script>
+```
+
+#### Pagefind.js can't test at dev
+
+At first, I refer to [this article](https://minifloppy.it/posts/2024/adding-pagefind-search-astro-website/#creating-the-search-page) 
+to implement Pagefind.js. but after trying, it works on build preview, but I can't test it on dev environment.
+
+Search for solution, I find [this article](https://scottwillsey.com/astro-pagefind/) suggesting 
+[Sergey Shishkin's Astro-Pagefind](https://github.com/shishkin/astro-pagefind). 
+There I give it a try. The implementation is more straightforward, and it will use last build indexing when on dev mode
+
+#### Bun can't add tailwind
+
+Bun have 2 mode, run using nodejs, or run using bun.exe when using flag `--bun`.
+To get the most of bun, I always try to use that flag, but got error when running `bunx --bun astro add tailwind`.
+
+Since this is [known issue](https://github.com/oven-sh/bun/issues/6843)
+
+The only thing that I can do right now is to avoid using `--bun` flag for a while.
+
+#### Bun can't install from git
+when I try to execute `bun add git+https://github.com/nridwan/astrojs-svelte5-patch.git#tags/v5.4.0`
+it got error:
+```
+error: moving "git+https://github.com/nridwan/astrojs-svelte5-patch.git#tags/v5.4.0" to cache dir failed
+ENOTEMPTY: Directory not empty (NtSetInformationFile())
+```
+
+to avoid it, I try to add the dependency manually to package.json then install it using `bun install`:
+```json
+//package.json
+{
+//...
+"dependencies": {
+  //...
+  "@astrojs/svelte": "git+https://github.com/nridwan/astrojs-svelte5-patch.git#tags/v5.4.0",
+  //...
+}
+//...
+}
+```
+
+### Final Thoughts
+Using bleeding edge technology sure is fun, as long as we know the how to deal with the limitation,
+and lower the expectation about everyhing is stable and bug free.

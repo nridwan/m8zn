@@ -1,6 +1,6 @@
 <script>
-  function renderCodeLang(container: HTMLElement) {
-    const classLang = container.className;
+  function renderCodeLang(container: HTMLElement, preBlock: HTMLElement) {
+    const classLang = preBlock.className;
     const lang = classLang.split("-")[1];
 
     if (lang !== "plaintext") {
@@ -58,7 +58,7 @@
       container.style.position = "relative";
       preBlock.parentElement?.insertBefore(container, preBlock);
 
-      renderCodeLang(container);
+      renderCodeLang(container, preBlock);
       renderCopyBtn(container, preBlock);
     }
   });
