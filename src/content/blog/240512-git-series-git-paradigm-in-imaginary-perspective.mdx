@@ -1,0 +1,53 @@
+---
+title: 'Git Series: Git Paradigm in Imaginary Perspective'
+description: 'An opinionated explanation about git'
+pubDate: '2024-05-12'
+image: '/assets/240512/cover.jpg'
+tags:
+  - Git
+---
+
+## Introduction
+Here I want to share my thoughts about git features in a way that \(I hope\) 
+people will understand git better.
+
+## Core Concept & Rules
+- Pretend that we're playing a game, where you can save your progress in a historical manner, where all your previous saves are being kept.
+  - Even better, your previous save can be loaded and be played again
+- You, and your team, can play the same game with the same cloud save -> 1 `git remote` used by multiple contributors
+- 1 Person should create the first save data, and sync it to the cloud -> `git init`, `git commit`, `git push`
+- Other person need to sync from the same cloud, then they can start play the game locally -> `git clone`
+- Each time you create a commit by using `git commit`, you're actually saving your progress.
+- You should sync your local saves to cloud save periodically to make sure your team aware of your progress -> `git push`
+- you can see list of old save data (history) -> `git log`
+  - In more detailed view, you can also see who made the history checkpoint, or even, who made the specific changes -> `git blame`
+- You can time travel to old save data, and create a new branch of history (timeline) out of it -> `git branch`
+- You can time travel to old save data, and overwrite the future saves -> `git push --force` 
+  - ⚠️ Warning, this feature must not be used in co-op mode. If you insist to use it, 
+make sure you have all contributor consent, and be cautious, once you break it and no one has the backup, 
+it's game over, your previous history is permanently erased
+- You can copy 1 cloud save into another cloud save -> [Forking](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo)
+- Every timeline / cloud save copy, can be combined into another timeline -> `merge`, `merge request`, `rebase`
+- If needed, a timeline can choose to include "a specific good result" from another timeline -> `cherry pick`
+- When you're already halfway of the game but don't get into a checkpoint, use "Save State", just like a game on certain retro emulators -> `git stash`
+- After using "Save State", you will go back on the last checkpoint, but you can:
+  - Check and fix another timeline first (`git branch`)
+  - Load the "Save State" later -> `git unstash`
+- You can rollback (`git revert`) a save data, this will invalidate the progress between a save data and previous history save data, but the history will remain
+  - Let's say, you have history like this: A (+1 point = 1) -> B (+1 point = 2) -> C (+2 point = 4) -> D (+3 point = 7) 
+  - you want to rollback C, since it's not perfect (not +3 point)
+  - your new history: A (+1 point = 1) -> B (+1 point = 2) -> C (+2 point = 4) -> D (+3 point = 7) -> Revert C (-2 point = 5)
+- When you try to combine (merge) timelines, there is a possibility of conflicts that should be resolved. 
+reference: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/addressing-merge-conflicts/resolving-a-merge-conflict-using-the-command-line
+  - let's say person A uses 10 point to increase AGI, meanwhile person B uses 10 point to increase VIT
+  - in present save data, they have a total 10 point before being used
+  - Person B want to merge the save data, but it shows error, and force person B to make a choice:
+    1. Use mine (Person B) ⚠️ Warning, this option is dangerous
+    2. Use theirs (Person A)
+    3. Use both ⚠️ Better than 1st option, but in most cases it causes error if left alone
+    4. Resolve conflict (combine both options)
+  - In reality, many of first time git user will choose the 1st option, which will create a confusion between team members, since others' progression is gone
+  - For best result, Person B should communicate with whoever made other changes, and create a solution acceptable by both parties.
+
+## Additional Resources
+try [Oh My Git!](https://ohmygit.org/), it's better at using visualization to help you learn git better.
