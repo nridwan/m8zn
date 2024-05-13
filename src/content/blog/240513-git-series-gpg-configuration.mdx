@@ -1,0 +1,192 @@
+---
+title: "Git Series: GPG Configuration"
+description: "A guide to make you become a verified contributor"
+pubDate: "2024-05-13"
+image: "/assets/240513/1-cover.jpg"
+tags:
+  - Git
+  - Git Series
+  - GPG
+---
+
+## Why?
+
+At [previous content](/blog/240512-1-git-series-multiple-credential-git-config)
+we have discussed about how to commit as another Name/Email address in a single device.
+This raise a security concern (though some of you will realize after I state this),
+as it is so easy for you to become an impostor (impersonate someone) in git ecosystem.
+
+For example, in a company, someone could hide their responsibility by changing their git settings
+to use other person's email and name. Or in public repositories with many contributors,
+one can become an impostor with having same name, similar username, different email,
+but make a pull request trying to fool everyone to see it as the real person making the request,
+and the commit is using the real person email.
+
+It is partially my consequences of revealing this technique, but since there is this countermeasure,
+I'm sure this method is quite well known out there.
+To counter this, we will try to learn GPG key.
+
+## Table of Contents
+
+- [Glossary](#glossary)
+  - [What is GPG Key](#what-is-gpg-key)
+- [Setup Guide](#setup-guide)
+  - [GPG Installation](#gpg-installation)
+  - [Create and Setup GPG Key on Remote Providers](#create-and-setup-gpg-key-on-remote-providers)
+  - [Enable GPG Signing in Git](#enable-gpg-signing-in-git)
+  - [Bonus, Multi Account Signing](#bonus-multi-account-signing)
+
+## Glossary
+
+Hold on, usually glossary found as a footnote, why here though?
+
+> Because you need to know where to set it up and what we will learn
+
+Directories:
+
+- Home Directory: `<HOME_DIRECTORY>`
+  - Windows: `C:\Users\yourname\`
+  - Linux/Mac: `/home/yourname`
+
+Files:
+
+- Main Git Config File: `<HOME_DIRECTORY>/.gitconfig`
+
+### What is GPG Key
+
+https://www.gnupg.org/
+TL;DR: GPG keys provide a digital identity for encryption and signing. But in git case, we'll only talk about signing features.
+
+Think of it like this:
+
+- You're sending a package to someone, imagine GPG key is a seal, or a stamp.
+- This stamp, will react to a special ultraviolet lamp, that you share to your recipients.
+- Other ultraviolet lamp won't be able to react to this stamp.
+- You will stamp your package.
+- The recipient will validate your stamp.
+
+The analogy:
+Stamp -> private key
+Special Ultraviolet Lamp -> public key
+
+In git case, github/gitlab/git remote providers are the recipient, they will validate your commits, and you are the package sender.
+
+## Setup Guide
+
+### GPG Installation
+
+- Normal Mode: You can use official distribution https://gnupg.org/download/
+- Easy Mode: use your favorite OS package manager.
+  - https://archlinux.org/packages/core/x86_64/gnupg/
+  - https://scoop.sh/#/apps?q=gpg&id=52bd1fd0d81eca16e57b7d328c5a032b7f795215
+  - https://winget.run/pkg/GnuPG/GnuPG
+  - https://community.chocolatey.org/packages/gnupg
+  - https://formulae.brew.sh/formula/gnupg
+
+Whatever decision you make, as long as `gpg` command installed, you are fine
+
+Get the path to GPG command with this:
+
+- linux/mac: `which gpg`
+- windows (Powershell): `(Get-Command gpg).Path`
+
+for example, mine is:
+`C:\Users\myusername\scoop\apps\gpg\current\bin\gpg.exe`
+
+Take note for this, we will come back later
+
+### Create and Setup GPG Key on Remote Providers
+
+- Create key by using command `gpg --full-generate-key`
+  - For me personally, I use:
+    - kind of key -> default -> ECC (Sign and encrypt)
+    - which elliptic curve -> Curve 25519
+    - key don't expire
+  - Note, my personal choice is not a must, seems github can accept most of these choices
+  - Then input:
+    - input your name
+    - your registered git remote account's email, in this example I'll use `admin@m8zn.work`
+    - your GPG password, will be asked each time you make a commit (cached 30 mins each time success inputting password)
+- run command `gpg --list-secret-keys --keyid-format-long`, it'll show kinda like this:
+
+```
+sec   ed25519/451DF2575F5A9588 2024-05-12 [SC]
+      D4DBCE468C79D17E198A993F451DF2575F5A9588
+uid                 [ultimate] Mietzen <admin@m8zn.work>
+ssb   cv25519/D0B5878A53044D28 2024-05-12 [E]
+```
+
+- see this part: ed25519/\<ID\>, note down this ID
+- run command `gpg --armor --export <ID>`, in this example: `gpg --armor --export 451DF2575F5A9588`, it'll show:
+
+```
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+
+blablablablablablablablabla
+-----END PGP PUBLIC KEY BLOCK-----
+```
+
+- go to GPG keys setting on your provider, usually on settings/preference, here's some sample:
+  - github: https://github.com/settings/keys
+  - gitlab: https://gitlab.com/-/user_settings/gpg_keys
+- press `new GPG key` (or `add new key` in gitlab) button
+- you will be presented with textarea, paste the exported public key in previous steps
+  - copy and include from `-----BEGIN PGP PUBLIC KEY BLOCK-----` part until `-----END PGP PUBLIC KEY BLOCK-----`
+- you will see your newly added key, see the email address.
+  - if there is no "Unverified" text, you're good to go
+  - if there is "Unverified" text,
+    it means the email you use to create key is different from your account's email,
+    repeat step from create key
+
+### Enable GPG Signing in Git
+
+- open `<HOME_DIRECTORY>/.gitconfig`
+- if you follow my previous guide or your device is able to commit a thing,
+  there must be a `[user]` section there. add `signingkey = <ID>` to the user section. Using previous section example,
+  the updated gitconfig would be like this:
+
+```.gitconfig
+[user]
+	name = Your Name
+	email = yourmainaccount@gmail.com
+  signingkey = 451DF2575F5A9588
+```
+
+- add `gpgsign = true` to `[commit]` section, if there is no `[commit]` section, add it:
+
+```.gitconfig
+[commit]
+	gpgsign = true
+```
+
+- add `program = <PATH_TO_GPG_COMMAND>` to `[gpg]` section, if there is no `[gpg]` section, add it.
+  - use the path we find when [GPG Installation](#gpg-installation)
+  - backslash become double backslash for windows
+  - slash still the same in linux/mac
+
+```.gitconfig
+[gpg]
+	program = C:\\Users\\myusername\\scoop\\apps\\gpg\\current\\bin\\gpg.exe
+```
+
+- Setup done, save the file, we will try to validate it
+- Open any git repo, make change, try to commit
+  - if you're prompted a password, and commit success afterwards, it's success.
+  - if not prompted a password, check `signingkey` setup in gitconfig, possibly wrong section or not yet exist
+  - if got error "no secret key", `signingkey` is different from your keys existed in `gpg --list-secret-keys --keyid-format=long`
+  - if password failed, check your memory once more, the password is GPG password, not your git password
+- use `git log --show-signature` to double check, quit the interface by pressing `q` in keyboard.
+  - if there is `Signature made`, `Good signature`. congratulations, it's success.
+- Final check (optional), `push` your commit. check your github/gitlab/other provider site. check your repository's commit.
+  your commit should have "verified" text in it.
+
+~~Great, now you can flex your verified checkmark~~
+
+### Bonus, Multi Account Signing
+
+If you follow my [previous content](/blog/240512-1-git-series-multiple-credential-git-config),
+you already know you can have separate email/name for specific directories.
+Now, you can also have "separate" GPG keys setup for each directories.
+
+Just setup new GPG keys for your second account, then at your specific directory `.gitconfig`, add `signingkey`,
+similar with steps in section [Enable GPG Signing in Git](#enable-gpg-signing-in-git)
