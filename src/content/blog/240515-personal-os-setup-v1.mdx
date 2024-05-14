@@ -1,0 +1,194 @@
+---
+title: "Personal OS Setup - App and Config Checklist V1"
+description: "Personal checklist of installed apps and app config for my machines"
+pubDate: "2024-05-15"
+image: "/assets/240515/cover.jpg"
+tags:
+  - Personal
+  - Windows
+  - Linux
+  - Mac
+  - GPG
+  - Git
+---
+
+## Why?
+No reason, this'd be my living documentation and checklist for my future self about: 
+- what I must install personally
+- what I consider to use personally
+- checklist to configure after reinstalling OSes
+
+## Glossary
+- [Initial Install Script](#initial-install-script)
+- [Must Install](#must-install)
+  - [Generic (Must Install)](#generic-must-install)
+  - [Windows (Must Install)](#windows-must-install)
+  - [Mac (Must Install)](#mac-must-install)
+- [Install When Needed](#install-when-needed)
+- [Config Checklist](#config-checklist)
+- [Config Checklist](#config-checklist)
+  - [1. Powershell 7 Config (Windows)](#1-powershell-7-config-windows)
+  - [2. GPG Migration](#2-gpg-migration)
+  - [3. .gitconfig](#3-gitconfig)
+
+## Initial Install Script
+- Windows: https://github.com/nridwan/DevMyWin
+- Linux (Archlinux): https://github.com/JaKooLit/Arch-Hyprland/
+- Mac: https://github.com/adamisntdead/DevMyMac
+
+## Must Install
+
+### Generic (Must Install)
+- [VSCodium](https://vscodium.com/)
+  - Must Install Plugins:
+    - GitLens
+    - GitGraph
+    - Flutter
+    - Prettier
+    - Batch Rename
+    - [Quick and Simple Text Selection](https://marketplace.visualstudio.com/items?itemName=dbankier.vscode-quick-select) 
+      - VSIX installation
+- [Neovim](https://neovim.io/)
+  - via package manager
+  - Note: with [LazyVim](https://www.lazyvim.org/) starter config
+- [Git](https://git-scm.com/)
+  - via package manager
+- [ZSH](https://ohmyz.sh/) 
+  - via install script
+  - Note: Linux/Mac only
+- [Kitty](https://sw.kovidgoyal.net/kitty/)
+  - via package manager
+  - Note: Linux/Mac only
+- [Flutter](https://flutter.dev/)
+  - via package manager
+- [Android Studio](https://developer.android.com/studio)
+  - via package manager on linux
+  - via installer on mac/windows
+- [NVS](https://github.com/jasongin/nvs)
+  - via install script
+  - all nodeJS version installed using this
+- [PNPM](https://pnpm.io)
+  - via install script
+- [OpenJDK](https://openjdk.org/)
+  - via package manager, multiple version
+  - switching using scoop (windows)
+  - switching using archlinux-java (linux)
+  - switching using JAVA_HOME (mac) - reference: https://medium.com/@devkosal/switching-java-jdk-versions-on-macos-80bc868e686a
+- [LibreOffice](https://www.libreoffice.org/discover/libreoffice/)
+  - via package manager linux (libreoffice-fresh)
+  - via installer for windows & mac
+
+### Windows (Must Install)
+- [Windows Terminal](https://apps.microsoft.com/detail/9n0dx20hk701)
+  - via microsoft store
+- [Powershell 7](https://github.com/PowerShell/PowerShell/releases)
+  - via installer
+- [Oh My Posh](https://ohmyposh.dev/)
+  - via install script
+  - Note: ZSH alternatives
+- [Scoop](https://scoop.sh/)
+  - Package manager for windows
+  - via install script
+- [Steam](https://store.steampowered.com/)
+  - via installer
+
+### Mac (Must Install)
+- [Brew](https://brew.sh/)
+  - Package manager for mac
+  - via install script
+- [XCode](https://apps.apple.com/us/app/xcode/id497799835?mt=12)
+  - also don't forget to `xcode-select --install`
+
+## Install when Needed
+- VSCodium Extensions:
+  - Astro
+  - MDX
+  - Svelte for VS Code
+  - Tailwind CSS
+  - rust-analyzer
+  - MDX
+  - Language Support for Java(TM) by Red Hat
+  - SonarLint
+  - Jest Runner
+  - [Flutter Tree](https://marketplace.visualstudio.com/items?itemName=marcelovelasquez.flutter-tree) 
+    - VSIX Installation
+- [Godot 4 Mono](https://godotengine.org/)
+- [Unity](https://unity.com/)
+- [Gimp](https://www.gimp.org/)
+- [Krita](https://krita.org/en/)
+- [Audacity](https://www.audacityteam.org/)
+- [Blender](https://www.blender.org/download/)
+- [Rust](https://www.rust-lang.org/)
+- [Bun](https://bun.sh/)
+- [Go](https://go.dev/)
+
+## Config Checklist
+
+### 1. Powershell 7 Config (Windows)
+- use powershell, run `notepad $PROFILE`
+- paste this:
+```
+oh-my-posh --init --shell pwsh --config $env:POSH_THEMES_PATH\robbyrussell.omp.json | Invoke-Expression
+Set-PSReadLineOption -HistorySearchCursorMovesToEnd
+Set-PSReadlineKeyHandler -Key UpArrow -Function HistorySearchBackward
+Set-PSReadlineKeyHandler -Key DownArrow -Function HistorySearchForward
+```
+- explanation:
+  - first line to activate oh-my-posh with robbyrussel theme
+  - second line is to acknowledge & end history suggestion when pressing right button
+  - third and fourth line is to search up/bottom just like zsh
+
+### 2. GPG Migration
+Move old GPG to new machine
+
+- Backup from old machine far before I need it, reference: https://gist.github.com/Killeroid/6361944d0694e474fb94cc42a3b119d1
+```bash
+gpg -a --export > mypubkeys.asc
+gpg -a --export-secret-keys > myprivatekeys.asc
+gpg --export-ownertrust > otrust.txt
+```
+
+- Copy the exported files to new machine, and run command
+```
+gpg --import mypubkeys.asc
+gpg --import myprivatekeys.asc
+gpg --import-ownertrust otrust.txt
+```
+
+### 3. .gitconfig
+- Main git config:
+```.gitconfig
+[credential]
+	useHttpPath = true
+#windows start
+[credential "helperselector"]
+	selected = manager-core
+#windows end
+[user]
+	name = MY_NAME
+	email = MY_EMAIL
+	signingkey = MY_GPG_ID
+[init]
+	defaultBranch = main
+[commit]
+	gpgsign = true
+
+#windows start
+[includeIf "gitdir/i:C:/Users/MYUSERNAME/MYCOMPANYNAME/"]
+	path = C:/Users/MYUSERNAME/MYCOMPANYNAME/.gitconfig
+#windows end
+#nix start
+[includeIf "gitdir/i:C:/Users/MYUSERNAME/MYCOMPANYNAME/"]
+	path = C:/Users/MYUSERNAME/MYCOMPANYNAME/.gitconfig
+#nix end
+[gpg]
+	program = PATH_TO_GPG #dont forget double backslash for windows
+```
+
+- Sub git config
+```.gitconfig
+[user]
+	name = MY_NAME
+	email = MY_EMAIL
+	signingkey = MY_GPG_ID
+```
