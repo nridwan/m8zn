@@ -1,0 +1,137 @@
+---
+title: "Opinion: Clean Code and Design Pattern"
+description: "What are they to me, and and how important are them?"
+pubDate: "2024-05-18"
+image: "/assets/240518/cover.jpg"
+tags:
+  - Opinion
+  - Clean Code
+  - Design Pattern
+---
+
+## Disclaimer
+This is purely my opinionated thoughts about Clean Code & Design Pattern, 
+this article is not to force someone to have the same opinion.
+
+It's okay if you have any disagreement, you should do your thing as how you usually should.
+Except when it comes to a company works, please follow the guideline that's been 
+created by your leads (that should be agreed together). 
+
+## Glossary
+
+- [1. Clean Code](#1-clean-code)
+  - [1.1. History](#11-history)
+  - [1.2. Popular Ruleset Opinion](#12-popular-ruleset-opinion)
+  - [1.3 What do I Think](#13-what-do-i-think)
+- [2. Design Pattern](#2-design-pattern)
+  - [2.1 Examples](#21-examples)
+  - [2.2 What do I Think](#22-what-do-i-think)
+- [3. Summary](#3-summary)
+
+## 1. Clean Code
+
+Based on my understanding from various articles and experience, clean code can be interpreted as
+a way to make your code easily read by others and maintainable by any means.
+
+### 1.1. History
+
+Clean code term is popularized by Robert C. Martin (Uncle Bob) by his book named "Clean Code: A Handbook of Agile Software Craftsmanship".
+In that book, he explains what is Clean Code and how to do it. He explains a bunch of ruleset to achieve "Clean Code".
+
+### 1.2. Popular Ruleset Opinion
+
+Among all the ruleset explained by Uncle Bob, there are several things that's commonly discussed.
+Here's the thing and what I thought about it:
+- Meaningful name: name everything (class, function, variable, etc) with language that everyone can understand.
+  - Pros:
+    - You can hope people can understand your code at first sight
+    - No need to have an essay of comments explaining everything in your code, 
+    a small line of comments will be sufficient, or even no need to add comment in some cases
+  - Cons:
+    - overdoing it will harm your copy/paste sense. let's say you have a function to process "Category" list,
+    instead of `categoryList` or `listCategory`, but I'd name it `list`, in favor of the context,
+    category itself is already explained in the data type/function name/class name. I do this to make sure whenever I need
+    to copy some of these logic for another thing, let's say "Content" list, I can copy it without needing to rename.
+    It may hurt "Don't repeat yourself", but at some cases, copy & paste is okay to do, depends on the context.
+- Abstraction: create an interface of things and have separate implementation, 
+the caller don't need to know the implementation code. usually get paired with Dependency Injection concepts.
+  - Pros: 
+    - you can easily made a different implementation and switch at will
+    - can do polymorphism things
+    - can do mocking in unit test, since white box testing needs to test the specific small things out of the codes.
+  - Cons:
+    - Performance overhead, this relates to dynamic dispatch instead of direct function call.
+    On modern devices the impact is usually unnoticeable, and interpreted language won't even bother this.
+- Small function & 1 thing: split a big function into several small functions. 
+Splitting done in favor of function responsibility, or rule where function must not be more than 20 lines (according to the book)
+  - Pros:
+    - Every function is easily read
+    - Small complexity for branching conditions
+  - Cons:
+    - Function call stacks sometimes annoying to debug
+    - Strictly applying this rule will create unecessary function that exist only as subfunction call of 1 function
+    - Possible performance overhead by extra function call. Some language could optimize this by inlining the function after compiled.
+- Don't Repeat yourself: Avoid the need of copy paste by leveraging function call to similar block of codes
+  - Pros:
+    - easy to maintain the code, just replace a thing and everything will be updated
+    - avoid code duplication rule in sonarqube
+  - Cons:
+    - not everything can be done using this approach. let's say we create a function with similar content for 2 different object,
+    even though the content is similar, you can't move the entire thing into a single function, at most efficient approach, you can
+    create a subfunction that process the "property" of the object, but here's the catch, only do it if it's worth to do.
+
+### 1.3 What do I Think
+- It is not about what is right and what is wrong, it is about rule & mutual understanding.
+- If you are alone, and keep yourself as a solo maintainer, you don't have to worry about these things,
+as long as you see it fit.
+- In general, clean code is helpful. But when it's done excessively, it could be a bit harmful.
+- Prioritize each language code convention first.
+- No need to enforce all of it, it is modifiable. The result is more important than the rules. 
+- Most important thing is to achieve maintanability, readability, and efficiency.
+
+## 2. Design Pattern
+
+In a way, I'd like to describe design pattern as "templates", that help you decide:
+- folder structures
+- file types
+- code correlation flows
+
+I won't go into detail explaining every available design pattern out there in this article.
+I'd only give you some example to understand it better.
+
+### 2.1 Examples
+
+There are some Design Pattern that is bound by the language/framework by default, 
+and there are some barebones that need to setup their own prefered design pattern.
+
+Framework default Design Patterns:
+- Code Igniter: Model View Controller
+- Laravel: Model View Controller
+- NestJS: not necessarily a named pattern, but there is kind of pattern where there is at least Modules, Controllers, Services, Dependency Injections
+- Android Kotlin: MVVM (not forced, but having official support and heavily promoted by google)
+- iOS: MVC
+
+Recommended Community Design Pattern:
+- Android Kotlin: MVP, MVI
+
+Define your own pattern:
+- Flutter: MVVM (using Cubit), MVI (using BLoC)
+
+also sometimes they're mixed with other pattern such as `Repository Pattern` to achieve Clean Code.
+
+### 2.2 What do I Think
+- Design Pattern is not really an perfect formula, just another mutual understanding between devs.
+- Modifiable, it can be simplified depends on your needs.
+- Evolves as time goes, there will be more pattern introduced in the future.
+- is a nice addition to maintain code easier.
+- using a pattern/modified version of an existing pattern could help you find new team member,
+as a new member who already learn it will adapt faster.
+- try to understand many design pattern is a good thing, to adapt different project cultures.
+can even be used to apply pattern suitable for yourself/your team in a barebone framework, such as expressjs.
+
+## 3. Summary
+- Both clean code and design pattern are introduced to "help" developers to have a mutual understanding in their team.
+- Both are not a perfect formula which should be followed as-is. 
+- Know the benefit and weakness, adjust it to reap most benefit while reducing the weaknesses.
+- If someone in a team found disagreement about the guideline applied for their clean code / pattern practices, 
+communicate it, find the reason of current process, if there is still something lacks, communicate the concern and solution for it.
