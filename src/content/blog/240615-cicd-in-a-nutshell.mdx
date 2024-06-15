@@ -1,0 +1,128 @@
+---
+title: "CI/CD In a Nutshell"
+description: "Definition and breakdown of simple CI/CD"
+pubDate: "2024-06-15"
+image: "/assets/240615/cover.jpg"
+tags:
+  - Opinion
+  - Clean Code
+  - Design Pattern
+---
+
+## Glossary
+
+- [1. What is CI/CD](#1-clean-code)
+  - [1.1. CI](#11-ci)
+  - [1.2. CD](#12-cd)
+- [2. Tools](#2-tools)
+- [3. Restrictions](#3-restrictions)
+- [4. How it Works](#4-how-it-works)
+
+## 1. What is CI/CD
+
+Basically, CI/CD is an automated workflow where your development process could automatically run a series of command-line tools to achieve something.
+
+### 1.1. CI
+
+Series of command-line tools to check project quality & stability, usually by analyzing source code and running unit test
+
+### 1.2. CD
+
+Optional process run after CI on certain condition, to publish the project. 
+By publishing, it means: build the project (if needed) > upload runnable project > notify update detail to stakeholders
+
+## 2. Tools
+
+Basic tools:
+- Runner machine (server/local machine)
+- Required command-line tools for your project tech-stacks
+  - example: `npm`, `gradle`, `flutter`, `xcode-project`, `cargo`, `gcc`, `javac`, `unity-editor`, `firebase`
+- Source control tools. 
+  - example: `git`
+
+Helper tools:
+- CI/CD service, either self-hosted or cloud service.
+  - example: Jenkins, Gitlab CI, Github Actions
+- Docker
+- Third-party helper tools.
+  - example: `Fastlane`
+
+## 3. Restrictions
+- In most case, CI/CD is available for any type of project, just need different approach.
+- In rare case, CI/CD won't work if your project is not able to be built/published using non-interactive command-line interface (CLI).
+  - by non-interactive CLI, it means:
+    - your app have must not rely on user interface to do the process (have command-line tools)
+    - command-line tools must be able to be run without human interference, such as password input prompt, etc
+- docker runner and cloud services such as Github Runner / Gitlab CI, since it's barebone kit, you will need to include tool installation steps before CI/CD steps.
+
+Notes:
+- If your background is a programmer who uses IDE to compile and run your app, such as android/iOS developer, you will find it hard at first.
+But trust me, even iOS which relies on its own proprietary software on specific OS (Mac OS), they can even use command line to build IPA and upload it to testflight.
+- If you heavily rely on community-made script using docker image/github action, and think: "Hey, it's impossible for me to migrate this to my own self-hosted CI/CD from scratch".
+Actually, it's possible, every community-made script is made of script/codes, which can be reverse engineered, and you will reveal its process.
+
+## 4. How it Works
+
+[![CI/CD Process](/assets/240615/cover.jpg)](/assets/240615/cover.jpg)
+
+- A user (developer) make changes, then push / create merge request
+- Push / merge request exist on source control, this will trigger source control to send event to your CI/CD service via webhooks
+- CI/CD service will then filter these events
+- if events are whitelisted, spawn CI/CD runner (docker, remote server, or even self-hosted machine connected via tunnel)
+- Series of commands will be executed based on source control event
+  - Usually CI is mandatory process, except CI is filtered only when merge request/specific commit message
+    - usually CI will notify developers about its result, one of its method is via merge request comment
+  - CD is run on specific event, such as commit with specific message on specific branch
+- finished
+
+## 5. Example
+Since it is complex and tool-reliance to give example with certain CI/CD service, we will do semi-automatic things, by creating custom script and run it when needed.
+I'll give example for flutter android apps, from doing unit test, build, and upload to firebase app distribution.
+
+Requirements:
+- Linux OS (VPS/local machine)
+- Preinstalled tools (on docker CI/CD runner/cloud provider, must create non interactive install scripts for these tools):
+  - [Flutter](https://docs.flutter.dev/get-started/install/linux/android?tab=download)
+  - [Android CLT](https://developer.android.com/studio)
+  - [Firebase](https://firebase.google.com/docs/cli)
+  - [genhtml](https://manpages.ubuntu.com/manpages/xenial/man1/genhtml.1.html)
+- Firebase project, enable [Firebase App Distribution](https://firebase.google.com/docs/app-distribution)
+- [Firebase Service Account](https://firebase.google.com/docs/app-distribution/authenticate-service-account?hl=id&platform=ios)
+
+Steps:
+- Create CI/CD script and place it on your project, let's say it's `buildscript/ci.sh` and `buildscript/cd.sh`. don't forget to `chmod +x buildscript/*.sh` after file created
+
+```buildscript/ci.sh
+flutter test --coverage
+genhtml -o coverage/html coverage/lcov.info --ignore-errors empty
+```
+
+```buildscript/cd.sh
+flutter build apk --release --obfuscate --split-debug-info=build/flutter_mapping
+firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.apk  \
+    --app $FIREBASE_APP_ID \
+    --release-notes-file build/changelog.txt \
+    --groups-file FirebaseDistributionConfig/groups.txt
+```
+
+- commit & push the scripts
+
+When you need to run CI tools:
+- go to your linux
+- clone the project
+- pull latest changes
+- switch to desired branch/commit
+- run `buildscript/ci.sh`
+
+When you need to run CD tools:
+- run previous CI steps, flutter test must passed, if not: go back to your IDE, fix, push again, repeat CI steps until it passed
+- register service account variable using command `export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json`
+- set firebase app id using `export FIREBASE_APP_ID=yourappid`. 
+This can be found in your firebase "General" Project Settings, for example: `export FIREBASE_APP_ID1:87732788080:android:57b4da20b7760391644db6`
+- run `buildscript/cd.sh`
+
+Note:
+- These CI/CD steps where you clone, pull, export variable, is further automated when you use CI/CD services.
+- In more advanced but self-made CI/CD service, you can create a simple web service which accept git webhook, 
+and automatically run things when the webservice is run.
+
