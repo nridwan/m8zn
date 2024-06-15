@@ -116,6 +116,11 @@ When you need to run CI tools:
 - switch to desired branch/commit
 - run `buildscript/ci.sh`
 
+Preparation before running CD tools:
+- prepare `build/changelog.txt`. fill it with current version changelog
+- prepare `FirebaseDistributionConfig/groups.txt`, with group name that should be able to receive this updates.
+- commit & push
+
 When you need to run CD tools:
 - run previous CI steps, flutter test must passed, if not: go back to your IDE, fix, push again, repeat CI steps until it passed
 - register service account variable using command `export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json`
