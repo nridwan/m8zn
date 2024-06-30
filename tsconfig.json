@@ -3,5 +3,6 @@
   "compilerOptions": {
     "baseUrl": ".",
     "rootDir": "."
-  }
+  },
+  "exclude": ["dist/**/*.js"]
 }
