@@ -189,7 +189,9 @@ got error:
 03:09:24.478	Failed: error occurred while running build command
 ```
 
-For temporary will use pnpm instead
+Update: Cloudflare uses Bun 1.0.1 by default, to mitigate it, 
+we must set BUN_VERSION to same version as local installed bun, for example,
+I use v1.1.17, so in cloudflare I must set BUN_VERSION to `1.1.17`
 
 ### Final Thoughts
 Using bleeding edge technology sure is fun, as long as we know the how to deal with the limitation,
