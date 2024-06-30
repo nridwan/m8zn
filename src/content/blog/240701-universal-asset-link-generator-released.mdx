@@ -1,0 +1,51 @@
+---
+title: "'Universal Asset Link Generator' Released"
+description: "A simple tool to apple-app-site-association & assetlinks.json"
+pubDate: "2024-07-01"
+image: "/assets/240701/cover.jpg"
+tags:
+  - Applink
+  - Universal Link
+  - AASA
+  - iOS
+  - Android
+  - Flutter
+---
+
+## Glossary
+
+- [1. What is this?](#1-what-is-this)
+- [2. Motivation](#2-motivation)
+- [3. Future Plan](#3-future-plan)
+
+## 1. What is this?
+
+This tool is to generate generic `assetlinks.json` and `apple-app-site-association`
+to add capabilities for Android and iOS app Universal Links.
+
+You can use it here: https://assetlink.m8zn.work
+
+### 2. Motivation
+
+As we all know that 
+[Firebase Dynamic Links is discontinued and will shut down on Aug 25th, 2025](https://firebase.google.com/support/dynamic-links-faq). 
+At first, I'd like to create its clone, but after seeing the condition,
+I think many people doesn't really need a cross product of shortlinking
+and universal link handler, some of them need to connect a real website to
+app when clicked. So, I decide to create this config generator instead,
+and let them do anything to their website if accessible from device that
+doesn't support or doesn't have the app installed.
+
+Flutter references:
+- [app_links package on pub.dev](https://pub.dev/packages/app_links)
+- [assetlinks.json setup guide](https://developer.android.com/training/app-links/verify-android-applinks)
+
+## 3. Future Plan
+
+Currently the tool is very minimalist, you just go to the page,
+insert your app, copy/download the generated file.
+
+There are some improvement that's planned on my head (not sure when to continue):
+- Autosave to local storage, which can be used to continue unfinished information
+- Save/Load system, which will be able to save and share configuration to other people,
+so those other people can load it back into the tool using different machine.
