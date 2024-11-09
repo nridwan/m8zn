@@ -1,0 +1,112 @@
+---
+title: "Private Dart Pub Dev, Self Hosted Solution"
+description: "Open source app to host private pub.dev Package Repository, substituting Jetbrains Space Dart Package"
+pubDate: "2024-11-09"
+image: "/assets/241109/cover.jpg"
+tags:
+  - Dart
+  - Flutter
+  - pub.dev
+  - Jetbrains Space
+  - Golang
+---
+
+## Table of Contents
+
+- [1. What is this?](#1-what-is-this)
+- [2. Motivation](#2-motivation)
+- [3. Why](#3-why)
+- [4. Technology Used](#4-technology-used)
+- [5. Features](#5-features)
+- [6. Showcase](#6-showcase)
+  - [6.1. Preparation Step](#61-preparation-step)
+  - [6.2. Token Setup](#62-token-setup)
+  - [6.3. Publishing](#62-publishing)
+
+## 1. What is this?
+
+This is another private Dart Package Repository, apart from existing solution, with its own unique approach.
+
+Repository: https://github.com/nridwan/private-dart-pub-repo
+
+## 2. Motivation
+
+[Jetbrains Space is discontinued and will be shut down on Nov 30, 2024](https://blog.jetbrains.com/space/2024/05/27/the-future-of-space/).
+This cause a huge concern since jetbrains space is the most promising affordable solution for private Dart Pcakage Repository at that time.
+Although there is also other similar service, both paid and free, jebtrains space have advantages over plan flexibility, they even
+have solution for on-premise host. Even though it's regrettable, their decision must be respected. Thanks for the good ride for a year.
+
+## 3. Why
+
+There are so many alternatives regarding this matter:
+- Use free cloud private solution. Cons: We never know, how long will the service last, or how long until they made changes to the terms & conditions.
+  - [OnePub](https://onepub.dev/)
+- Subscribe premium solution. Cons: pricey, less availability for hobbyist
+  - [Cloudsmith](https://help.cloudsmith.io/docs/dart-repository)
+  - [Jfrog Artifactory](https://www.jfrog.com/confluence/display/JFROG/Pub+Repositories)
+  - [Inedo Proget](https://docs.inedo.com/docs/proget/feeds/pub)
+- [Use git-based package](https://dart.dev/tools/pub/dependencies#git-packages). 
+  Cons: versioning might be painful, if you have multiple package that have dependency hell to each other
+- Copy paste entire repository as sub-package in monorepo project using [melos](https://melos.invertase.dev/).
+  Cons: once copied, it's project developer's responsibility to manually patch/merge update of the libraries.
+- **DO IT YOURSELF**. yes, this is my choice, since I can design whatever I want with it.
+
+## 4. Technology Used
+
+- Golang (Fiber): The reason is quite shallow for this one, I want to deepen my understanding around golang while implement real world problem solution.
+- PostgreSQL: Somehow structured database nowadays already cover basic needs of everything, including JSON datatype which can be considered semi-nosql trait.
+- S3 compatible storage: to increase scalability of storage space attached to the server, 
+  while also increasing security since not anyone can access the link (must be presigned).
+- SMTP: for Forgot/change password feature, removing admin privilege of changing user's password.
+
+## 5. Features
+- User management:
+  - Admin can create/update/delete users
+  - User can see their profile after login
+- Write access management:
+  - Admin can disable/enable user's write access
+  - User can create multiple pub token with different access level (read only/read-write)
+- Package visibility:
+  - Hosted package can be set as private/public by admin. 
+  - When set to public, anyone without read token could also discover and use the package
+  - When private, only user that already set the pub token can discover and use the package
+- [Dart Repository Spec v2](https://github.com/dart-lang/pub/blob/master/doc/repository-spec-v2.md) Implementation
+  - could publish using `dart pub publish` to the server
+  - could use hosted package using `dart pub add` or adding hosted package to `pubspec.yaml`
+
+## 6. Showcase
+
+### 6.1. Preparation step
+1. Clone the repo: https://github.com/nridwan/private-dart-pub-repo
+2. Copy `docker-compose.example.yml` to `docker-compose.yml`, adjust environment & things. in this showcase, we will use port 3000 instead of 4000
+3. run `docker compose up -d --build`. make sure no error
+4. run `docker exec -it pubserver sh` to open docker shell of the server, then run `/pubserver db:seed` inside it
+5. Open postman, import collection and environment provided in the `/docs` directory of repository
+
+### 6.2. Token setup
+1. Run `Users > Login` in the postman, make sure email/password the same as seeder.
+2. Create token using `Pub Token > Create` in the postman, we will use write:true to enable read-write token.
+![Pub Token Create](/assets/241109/131815.png)
+3. Open terminal, run: `dart pub token add http://localhost:3000/v1/pub/` (on real host, `http://localhost:3000` should be changed to real url and https for safety)
+![Set pub token](/assets/241109/131901.png)
+
+### 6.3. Publishing
+We will use [dartz](https://github.com/spebbe/dartz) as an example in this showcase
+1. Clone the [repo](https://github.com/spebbe/dartz)
+2. Add publish_to section in `pubspec.yaml` with `http://localhost:3000/v1/pub/`:
+![Add publish_to](/assets/241109/132124.png)
+3. run `dart pub publish`:
+![dart pub publish 1](/assets/241109/132130.png)
+![dart pub publish 2](/assets/241109/134536.png)
+
+### 6.4. Using The Package
+1. Create new dart/flutter project
+2. Add the repository, there are multiple way to do it:
+  - Add latest version using `dart pub add 'dartz:{"hosted":"http://localhost:3000/v1/pub/"}'`
+  ![dart pub add latest](/assets/241109/134835.png)
+  - Add specific version using `dart pub add 'dartz:{"hosted":"http://localhost:3000/v1/pub/","version":"^0.10.0"}'`
+  ![dart pub add latest](/assets/241109/134835.png)
+  - Directly add in pubspec.yaml then use `dart pub get`
+  ![direct pubspec.yaml](/assets/241109/140230.png)
+3. Downloaded package can be used in the project like public dependency hosted at pub.dev
+  ![Sample package usage](/assets/241109/140246.png)
