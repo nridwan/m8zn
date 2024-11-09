@@ -24,6 +24,7 @@ tags:
   - [6.2. Token Setup](#62-token-setup)
   - [6.3. Publishing](#63-publishing)
   - [6.4. Using The Package](#64-using-the-package)
+- [7. Use Cases](#7-use-cases)
 
 ## 1. What is this?
 
@@ -120,3 +121,10 @@ We will use [dartz](https://github.com/spebbe/dartz) as an example in this showc
   ![direct pubspec.yaml](/assets/241109/140230.png)
 3. Downloaded package can be used in the project like public dependency hosted at pub.dev
   ![Sample package usage](/assets/241109/140246.png)
+
+## 7. Use Cases
+There are several usecases where this server could be useful:
+- Open source package creator that wants to have private sandbox to check whether the published package would be able to function well.
+- Company who is doing their own internal package management or just can't use public package due to intranet restriction.
+- Company who is developing premium package distribution, and share it with their client, 
+  and enable them to control whether their client still can access it or not.
