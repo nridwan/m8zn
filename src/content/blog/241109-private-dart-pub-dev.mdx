@@ -7,6 +7,7 @@ tags:
   - Dart
   - Flutter
   - pub.dev
+  - Artifactory
   - Jetbrains Space
   - Golang
 ---
@@ -26,7 +27,7 @@ tags:
 
 ## 1. What is this?
 
-This is another private Dart Package Repository, apart from existing solution, with its own unique approach.
+This is another private Dart Package Repository / Artifactory, apart from existing solution, with its own unique approach.
 
 Repository: https://github.com/nridwan/private-dart-pub-repo
 
@@ -50,6 +51,8 @@ There are so many alternatives regarding this matter:
   Cons: versioning might be painful, if you have multiple package that have dependency hell to each other
 - Copy paste entire repository as sub-package in monorepo project using [melos](https://melos.invertase.dev/).
   Cons: once copied, it's project developer's responsibility to manually patch/merge update of the libraries.
+- Modify existing open source solution.
+  - [Unpub](https://github.com/pd4d10/unpub)
 - **DO IT YOURSELF**. yes, this is my choice, since I can design whatever I want with it.
 
 ## 4. Technology Used
@@ -74,6 +77,10 @@ There are so many alternatives regarding this matter:
 - [Dart Repository Spec v2](https://github.com/dart-lang/pub/blob/master/doc/repository-spec-v2.md) Implementation
   - could publish using `dart pub publish` to the server
   - could use hosted package using `dart pub add` or adding hosted package to `pubspec.yaml`
+- Public repo url forwarding. If package not found, the server could redirect to upstream repo url, to discover more package. 
+  This feature is copied from [unpub](https://github.com/pd4d10/unpub)
+
+Note: these features are heavily adapted from Jetbrains Package Repository concept + Unpub.
 
 ## 6. Showcase
 
