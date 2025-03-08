@@ -1,0 +1,173 @@
+---
+title: "Wireguard: Beyond Basic VPN Use"
+description: "Introduction around Wireguard and debunk some VPN paradigm"
+pubDate: "2025-03-08"
+image: "/assets/250308/cover.png"
+tags:
+  - VPN
+  - Wireguard
+---
+
+## Table of Contents
+
+- [1. About VPN](#1-about-vpn)
+- [2. Why WIreguard, what's different?](#2-why-wireguard-whats-different)
+- [3. Wireguard Scenario Example](#3-wireguard-scenario-example)
+  - [Sample Config](#sample-config)
+  - [Peer to Peer](#Peer-to-Peer)
+  - [Peer to Peer via Server Route Config](#Peer-to-Peer-via-Server-Route-Config)
+  - [Internet/Network Masking](#InternetNetwork-Masking)
+  - [Internet to Local (tunnel)](#Internet-to-Local-tunnel)
+
+## 1. About VPN
+
+Most people will have ever heard about VPN, but really, what is VPN?
+It's not just a simple service that redirects your internet connection.
+Using analogy, it's more like an exclusive community where one should have a member card
+to join, communicate, and even using the facilities, without worrying outside world could spy on them (encrypted).
+
+In terms of most overused VPN as internet masking provider, the internet masking feature
+is just merely a facility inside the network. It can be used for other things, for example:
+
+- connecting multiple local device through internet, to share data or play games together
+- accessing some server that's not publicly available on the internet
+- publish local device server to the internet (tunneling)
+
+## 2. Why Wireguard, what's different?
+
+In terms of normal VPN, we know the term of "Server" and "Clients".
+
+- Server: a device which serve as primary node where all client should connect to them,
+  they manage what the client can do once they connect to it.
+- Client: a device that connect to the server in attempt to do something.
+
+Meanwhile in wireguard, both "Server" and "Clients" have equal standing, named "Peers".
+Each Peers can connect to other peer, and can be connected from other peer.
+
+The only note here is, not all "Peers" are created equals.
+
+- As a server, peer should be configured to listen (using ListenPort) to a certain port,
+  and a certain route configuration to enable the client to do something. and they also need
+  to list their clients' public keys and IP addresses, each should be unique.
+- As a client, peer should only need to specify their IP address, private key, server's public key,
+  and what IP address to be forwarded to the server peer.
+- As both client and server, should configure both.
+
+Also, for IP configuration, it's well noted that wireguard doesn't follow the orthodox network
+segments split by subnetmask/prefix. If you want to, you can have different IP segment, and even use /32 prefix for each IP.
+For example: server is located at 192.168.255.1/32, and client is located at 10.0.0.1/32. it'll work, they can connect well.
+
+## 3. Wireguard Scenario Example
+
+### Sample Config
+
+- Server (public IP: 1.2.3.4):
+
+```conf
+[Interface]
+Address = 10.0.0.1/24
+ListenPort = 51820
+PrivateKey = eBYIwdLD6GsXdcZvAJDow1N15TdEDpwZh8NkUoVplFM=
+
+[Peer]
+PublicKey = z09I2S7aEeAP12/F2z4wfJxZjG9nUd+//EkyO63cvEs=
+AllowedIPs = 10.0.0.2
+
+[Peer]
+PublicKey = q5bTriMOm7KZeNWBR7RX1qhaDx9PlCa1SGyr/p2Ax0k=
+AllowedIPs = 10.0.0.3
+
+[Peer]
+PublicKey = NtqA6CPnoeVBYza4xxf8pIzIY/3CvD+Ss1H7KRCFWgc=
+AllowedIPs = 10.0.0.4
+```
+
+In this setting, the server acknowledge there are 3 client that could connect to it, 10.0.0.2 ~ 10.0.0.4.
+Once connected, they could access the server via 10.0.0.1. this server should also serve as gateway for
+the clients if they want to connect somewhere else.
+
+Each PublicKey should match with client's private key pair. and AllowedIPs should contain client's IP address.
+
+In this configuration, each peer could only communicate with server, not with another client.
+In order for client to connect to other client, there are 2 choices: add routing table, peer to peer direct connection
+
+- Client:
+
+```conf
+[Interface]
+PrivateKey = EPcFUviMlTTs1Th72TEQWtx6jzK62+/+kV551+0xvl4=
+Address = 10.0.0.2/32
+
+[Peer]
+PublicKey = hW2VH25Q1wUCHEdyIc7/ht44urG+917d34nwsznSUyc=
+AllowedIPs = 10.0.0.1/32
+Endpoint = 1.2.3.4:51820
+PersistentKeepalive = 25
+```
+
+In this setting, the client (10.0.0.2) connect to server 1.2.3.4.
+Client's private key will be matched with server PublicKey setting, if it's match, they're connected.
+
+Since AllowedIPs is only 10.0.0.1/32, client can only access the server via 10.0.0.1.
+
+Another example for AllowedIPs:
+
+- full internet masking provider: `AllowedIPs: 0.0.0.0/0`
+- can access certain other IP, using server as gateway: `AllowedIPs: 10.0.0.1/32, 192.168.0.0/24, 192.168.5.32`
+  - note: AllowedIPs support comma separated value, subnet prefix, and not using prefix (counted as /32 prefix)
+
+Endpoint is how the client could connect to the server, where is server's public IP,
+and which port act as Wireguard Server (ListenPort)
+
+PersistentKeepalive is to make sure the client automatically initiate / retry connection per x seconds,
+in this example 25 seconds.
+This is optional, only needed when the server need to initiate connection to client,
+since server only can access client after client do handshake/initiate connection,
+and this configuration do it automatically.
+
+![Sample Config](/assets/250308/wg-usecase-1.png)
+
+### Peer to Peer
+
+![Sample Config](/assets/250308/wg-peer-to-to-local.svg)
+
+In this case, Client A add Client B as peer, and so does Client B. they'll communicate directly.
+The weakness of this method is, if client A and client B is behind each of their own NAT (usually from internet provider)
+this scenario can't be done
+
+### Peer to Peer via Server Route Config
+
+![Sample Config](/assets/250308/wg-peer-to-peer-to-local.svg)
+
+In this case, Client A and Client B can be connected each other through Server,
+only if the Server correctly setting their route config.
+
+In the sample config above I use nftables syntax, which translated to:
+
+```
+When Client A want to contact Client B, accept it.
+```
+
+Normally, if this was other VPN method, they'd be assumed as same network and don't need routing.
+Since this wireguard only provide host-to-peer connection, this configuration is needed to forward the network.
+
+### Internet/Network Masking
+
+![Sample Config](/assets/250308/wg-internet-to-local.svg)
+
+This is the most simple and used by many people.
+The server literally says: `I don't care, just pass through this way to anywhere`.
+
+In more advanced scenario, we can limit which IPs need to pass through the VPN,
+by limiting target IP in client's AllowedIPs.
+
+### Internet to Local (tunnel)
+
+![Sample Config](/assets/250308/wg-internet-to-local.svg)
+
+This is quite unpopular method, but really powerful once we know its usage.
+For this sample, it just says, redirect TCP connection to the server with port 8000 to Client A at port 7000.
+So we will be able to connect Client A to the internet via wireguard.
+
+I will cover the advanced usage of this method later, and spill why it's powerful,
+even though we have tunneling service such as ngrok, cloudflare tunnel, etc.
